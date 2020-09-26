@@ -1,0 +1,27 @@
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note (with note data)
+
+note over server:
+Server adds new info to data.json
+end note
+
+server-->browser: redirect to /exampleapp/notes
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/notes
+server-->browser: HTML-code
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
+server-->browser: main.css
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
+server-->browser: main.js
+
+note over browser:
+Browser executes js-code and 
+requests JSON data from server
+end note
+
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
+server-->browser: data.json
+browser->server: HTTP GET https://studies.cs.helsinki.fi/favicon.ico
+server-->browser: favicon.ico (if possible)
+
+note over browser:
+Cache has priority
+end note

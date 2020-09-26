@@ -1,0 +1,14 @@
+note over browser:
+Now user wants to create a new note.
+"Save" was pressed.
+end note
+
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+
+
+note over server:
+Servers recieves new list of notes from
+browser with a new note added.
+end note
+
+browser->browser: Browser redraws note list on the same page
