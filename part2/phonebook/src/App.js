@@ -1,20 +1,23 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import SearchFilter from './components/SearchFilter'
 import NewContactForm from './components/NewContactForm'
 import Contacts from './components/Contacts'
+import axios from 'axios'
 
 const App = () => {
-    const [persons, setPersons] = useState([
-        {
-            name: 'Arto Hellas',
-            number: '123123123',
-            id: 0,
-            filtered: true
-        }
-    ])
+    const [persons, setPersons] = useState([])
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [currentSearch, setSearch] = useState('')
+
+    useEffect(() => {
+        axios
+            .get('http://localhost:3001/persons')
+            .then(response => {
+                setPersons(response.data)
+            })
+    }, [])
+
     let namesToShow = []
     if (currentSearch === "") {
         namesToShow = persons
