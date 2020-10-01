@@ -3,12 +3,14 @@ import SearchFilter from './components/SearchFilter'
 import NewContactForm from './components/NewContactForm'
 import Contacts from './components/Contacts'
 import contactService from './services/contacts'
+import Notification from './components/Notification'
 
 const App = () => {
     const [persons, setPersons] = useState([])
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [currentSearch, setSearch] = useState('')
+    const [notification, setNotification] = useState(null)
 
     useEffect(() => {
         contactService
@@ -38,9 +40,8 @@ const App = () => {
                         setPersons(persons.map(person => person.id !== changedPerson.id ? person : changedPerson))
                     })
                     .catch(error => {
-                        alert(
-                            `The user ${changedPerson.name} was already deleted from server`
-                        )
+                        setNotification('This user was already removed from server')
+                        setTimeout(() => setNotification(null), 5000)
                         setPersons(persons.filter(n => n.id !== changedPerson.id))
                     })
             }
@@ -58,6 +59,8 @@ const App = () => {
                     setNewName('')
                     setNewNumber('')
                 })
+            setNotification('New user added')
+            setTimeout(() => setNotification(null), 5000)
         }
     }
 
@@ -87,6 +90,7 @@ const App = () => {
     return (
         <div>
             <h2>Phonebook</h2>
+            <Notification message={notification} />
             <SearchFilter currentSearch={currentSearch} searchChange={searchChange} />
             <h2>add a new</h2>
             <NewContactForm newNameHandler={newNameHandler} newName={newName} nameChange={nameChange} newNumber={newNumber} numberChange={numberChange} />
