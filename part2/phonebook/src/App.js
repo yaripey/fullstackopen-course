@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import SearchFilter from './components/SearchFilter'
 import NewContactForm from './components/NewContactForm'
 import Contacts from './components/Contacts'
-import axios from 'axios'
+import contactService from './services/contacts'
 
 const App = () => {
     const [persons, setPersons] = useState([])
@@ -11,10 +11,10 @@ const App = () => {
     const [currentSearch, setSearch] = useState('')
 
     useEffect(() => {
-        axios
-            .get('http://localhost:3001/persons')
-            .then(response => {
-                setPersons(response.data)
+        contactService
+            .getAll()
+            .then(initialContacts => {
+                setPersons(initialContacts)
             })
     }, [])
 
@@ -28,25 +28,36 @@ const App = () => {
 
     const newNameHandler = (event) => {
         event.preventDefault()
-        let search = ''
-        for (let i = 0; i < persons.length; i++) {
-            if (persons[i].name === newName) {
-                search = persons[i].name
+        const person = persons.find(n => n.name === newName)
+        if (person !== undefined) {
+            if (window.confirm(person.name + ' is already added to phonebook, replace the old number with a new one?')) {
+                const changedPerson = { ...person, number: newNumber }
+                contactService
+                    .update(changedPerson.id, changedPerson)
+                    .then(returnedPerson => {
+                        setPersons(persons.map(person => person.id !== changedPerson.id ? person : changedPerson))
+                    })
+                    .catch(error => {
+                        alert(
+                            `The user ${changedPerson.name} was already deleted from server`
+                        )
+                        setPersons(persons.filter(n => n.id !== changedPerson.id))
+                    })
             }
-        }
-        if (search !== '') {
-            alert('There is already such name')
-            console.log('test')
-            return false
         } else {
             const nameObject = {
                 name: newName,
                 number: newNumber,
                 id: persons.length + 1,
             }
-            setPersons(persons.concat(nameObject))
-            setNewName('')
-            setNewNumber('')
+
+            contactService
+                .create(nameObject)
+                .then(returnedContact => {
+                    setPersons(persons.concat(returnedContact))
+                    setNewName('')
+                    setNewNumber('')
+                })
         }
     }
 
@@ -60,7 +71,17 @@ const App = () => {
 
     const searchChange = (event) => {
         setSearch(event.target.value)
+    }
 
+    const deleteContact = (event) => {
+        if (window.confirm('Delete this user?')) {
+            const targetId = parseInt(event.target.className)
+            contactService
+                .deleteContact(targetId)
+                .then(data => {
+                    setPersons(persons.filter(person => person.id !== targetId))
+                })
+        }
     }
 
     return (
@@ -70,7 +91,7 @@ const App = () => {
             <h2>add a new</h2>
             <NewContactForm newNameHandler={newNameHandler} newName={newName} nameChange={nameChange} newNumber={newNumber} numberChange={numberChange} />
             <h2>Numbers</h2>
-            <Contacts namesToShow={namesToShow} />
+            <Contacts namesToShow={namesToShow} deleteContact={deleteContact} />
         </div>
     )
 }
